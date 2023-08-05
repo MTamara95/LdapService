@@ -1,9 +1,12 @@
-const { Client, UnknownStatusCodeError, ServerSideSortingRequestControl } = require('ldapts');
+const { Client } = require('ldapts');
 const INVALID_CREDENTIALS_ERROR_CODE = 49;
 const INVALID_CREDENTIALS_ERROR_MESSAGE = 'Invalid credentials';
+require("dotenv").config();
+
+var domain = process.env.USERDNSDOMAIN;
+console.log(domain);
 
 class LdapService {
-
     constructor() {
         this.ldapClient = new Client({
             url: 'ldap://avisto-eastern.com',
@@ -11,7 +14,7 @@ class LdapService {
         });
     }
 
-  async connect(username, password, domain){
+  async connect(username, password){
     try{
         await this.ldapClient.bind(username + '@' + domain, password);
         console.log(`isConnected: ${this.ldapClient.isConnected}`);
@@ -27,13 +30,14 @@ class LdapService {
       }
   }
 
-  async search(username, password, domain){
+  async search(username, password){
+
     try{
         await this.connect(username, password, domain);
         const searchResult = await this.ldapClient.search('dc=avisto-eastern,dc=com',{
             filter: '(userPrincipalName=' + username + '@' + domain + ')',
         });
-
+        console.log(searchResult);
         return searchResult;
     }
     catch(error){
