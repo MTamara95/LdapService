@@ -3,11 +3,9 @@ const INVALID_CREDENTIALS_ERROR_CODE = 49;
 const INVALID_CREDENTIALS_ERROR_MESSAGE = 'Invalid credentials';
 require("dotenv").config();
 
-var domain = process.env.USERDNSDOMAIN;
-console.log(domain);
-
 class LdapService {
-    constructor() {
+    constructor(domain) {
+      this.domain = domain;
         this.ldapClient = new Client({
             url: 'ldap://avisto-eastern.com',
             referrals: 'throw' 
@@ -16,12 +14,12 @@ class LdapService {
 
   async connect(username, password){
     try{
-        await this.ldapClient.bind(username + '@' + domain, password);
+        await this.ldapClient.bind(username + '@' + this.domain, password);
         console.log(`isConnected: ${this.ldapClient.isConnected}`);
       }
       catch(error){
         if(error.code == INVALID_CREDENTIALS_ERROR_CODE){
-          throw new Error(INVALID_CREDENTIALS_ERROR_MESSAGE);
+          throw new Error(INVALID_CREDENTIALS_ERROR_MESSAGE + ': ' + this.domain);
         }
         else{
             this.ldapClient.unbind();
@@ -33,9 +31,9 @@ class LdapService {
   async search(username, password){
 
     try{
-        await this.connect(username, password, domain);
+        await this.connect(username, password);
         const searchResult = await this.ldapClient.search('dc=avisto-eastern,dc=com',{
-            filter: '(userPrincipalName=' + username + '@' + domain + ')',
+            filter: '(userPrincipalName=' + username + '@' + this.domain + ')',
         });
         console.log(searchResult);
         return searchResult;

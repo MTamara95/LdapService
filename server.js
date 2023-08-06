@@ -9,7 +9,7 @@ const cors = require('cors');
 app.use(express.json());
 app.use(cors());
 
-const ldapService = new LdapService();
+const ldapService = new LdapService(process.env.USERDNSDOMAIN);
 
 // API endpoint to handle LDAP operations
 app.post('/api/ldap/search', async (req, res) => {
