@@ -17,7 +17,7 @@ app.post(API_ENDPOINT, async (req, res) => {
 
   try {
     const result = await ldapService.search(username, password);
-    res.json(result);
+    res.json({'emailAddress': result.searchEntries[0].mail, 'role': result.searchEntries[0].memberOf});
   } catch (error) {
     res.status(INTERNAL_SERVER_ERROR_CODE).json({ error: error.message });
   }
