@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const LdapService = require('./ldap.service');
-const {API_ENDPOINT, INTERNAL_SERVER_ERROR_CODE} = require('./constants.ts');
+const {API_ENDPOINT, INTERNAL_SERVER_ERROR_CODE, INVALID_CREDENTIALS_ERROR_MESSAGE, UNAUTHORIZED_ERROR_CODE} = require('./constants.ts');
 const app = express();
 const port = 3000;
 
@@ -19,7 +19,12 @@ app.post(API_ENDPOINT, async (req, res) => {
     const result = await ldapService.search(username, password);
     res.json({'emailAddress': result.searchEntries[0].mail, 'role': result.searchEntries[0].memberOf});
   } catch (error) {
-    res.status(INTERNAL_SERVER_ERROR_CODE).json({ error: error.message });
+    if(error.message == INVALID_CREDENTIALS_ERROR_MESSAGE){
+      res.status(UNAUTHORIZED_ERROR_CODE).json({error: error.message});
+    }
+    else{
+      res.status(INTERNAL_SERVER_ERROR_CODE).json({ error: error.message });
+    }
   }
 });
 
